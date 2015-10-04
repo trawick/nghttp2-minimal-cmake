@@ -63,9 +63,51 @@ INCLUDE_DIRECTORIES(${NGHTTP2_INCLUDE_DIRECTORIES})
 
 SET(NGHTTP2_PUBLIC_HEADERS_STATIC
   lib/includes/nghttp2/nghttp2.h
-  lib/includes/nghttp2/nghttp2ver.h
 )
-# XXX set NGHTTP2_PUBLIC_HEADERS_GENERATED when nghttp2ver.h is generated
+SET(NGHTTP2_PUBLIC_HEADERS_GENERATED
+  ${PROJECT_BINARY_DIR}/nghttp2/nghttp2ver.h
+)
+
+# Extract nghttp2 version from canonical source
+SET(configureac_filename ${PROJECT_SOURCE_DIR}/configure.ac)
+FILE(STRINGS ${configureac_filename} configureac)
+SET(version_found FALSE)
+FOREACH(line ${configureac})
+  STRING(REGEX MATCH "^AC_INIT\\(\\[nghttp2\\], \\[(.*)\\], \\[" ignored ${line})
+  SET(nghttp2_version_str ${CMAKE_MATCH_1})
+  IF(NOT ${nghttp2_version_str} STREQUAL "")
+    SET(version_found TRUE)
+    BREAK()
+  ENDIF()
+ENDFOREACH()
+IF(NOT ${version_found})
+  MESSAGE(FATAL_ERROR "nghttp2 version string not found in source file ${configureac_filename}")
+ENDIF()
+
+SET(PACKAGE_VERSION "${nghttp2_version_str}")
+# Build hex version number from version string, which is either x.y.z or x.y.z-DEV
+# First, split version string into major/minor/patch.
+STRING(REPLACE "." " " version_components ${nghttp2_version_str})
+STRING(REPLACE "-" " " version_components ${version_components})
+SEPARATE_ARGUMENTS(version_components)
+LIST(GET version_components 0 ver_major)
+LIST(GET version_components 1 ver_minor)
+LIST(GET version_components 2 ver_patch)
+STRING(LENGTH ${ver_major} len)
+IF(len LESS 2)
+  SET(ver_major "0${ver_major}")
+ENDIF()
+STRING(LENGTH ${ver_minor} len)
+IF(len LESS 2)
+  SET(ver_minor "0${ver_minor}")
+ENDIF()
+STRING(LENGTH ${ver_patch} len)
+IF(len LESS 2)
+  SET(ver_patch "0${ver_patch}")
+ENDIF()
+SET(PACKAGE_VERSION_NUM "0x${ver_major}${ver_minor}${ver_patch}")
+CONFIGURE_FILE(lib/includes/nghttp2/nghttp2ver.h.in
+               ${PROJECT_BINARY_DIR}/nghttp2/nghttp2ver.h)
 
 SET(install_targets)
 SET(install_bin_pdb)
@@ -90,6 +132,7 @@ ENDIF()
 
 INSTALL(FILES ${NGHTTP2_PUBLIC_HEADERS_STATIC} ${NGHTTP2_PUBLIC_HEADERS_GENERATED} DESTINATION include/nghttp2)
 
+MESSAGE(STATUS "  nghttp2 version ................. : ${nghttp2_version_str}")
 MESSAGE(STATUS "  Build type ...................... : ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "  Install .pdb (if available)...... : ${INSTALL_PDB}")
 MESSAGE(STATUS "  Install prefix .................. : ${CMAKE_INSTALL_PREFIX}")

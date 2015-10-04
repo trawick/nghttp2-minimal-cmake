@@ -7,14 +7,21 @@ Instructions
 ------------
 
 1. Download and unpack nghttp2-1.3.4.zip (the only version I tested) from https://nghttp2.org/.
-2. Edit `lib\includes\nghttp2ver.h` to set `NGHTTPD_VERSION` and `NGHTTP2_VERSION_NUM` to `"1.3.4"` and `0x010304` (or appropriate values for other releases).
-3. Copy the `CMakeLists.txt` file from this repository to the top-level nghttp2 source directory.
-4. Open a Visual Studio command prompt with `cmake` in `PATH` and run the following commands from a scratch (build) directory:
+2. Copy the `CMakeLists.txt` file from this repository to the top-level nghttp2 source directory.
+3. Open a Visual Studio command prompt with `cmake` in `PATH` and run the following commands from a scratch (build) directory:
 ```
 cmake -DCMAKE_INSTALL_PREFIX=c:\path\to\install -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo c:\path\to\nghttp2-1.3.4
 nmake
 nmake install
 ```
+
+History
+-------
+
+* 2015-10-04
+  * Automatically configure `nghttp2ver.h`
+* 2015-10-03
+  * Initial version
 
 Future plans
 ------------
