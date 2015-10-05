@@ -142,7 +142,7 @@ ADD_LIBRARY(nghttp2 SHARED ${NGHTTP2_SOURCES} lib/nghttp2.rc)
 SET(install_targets ${install_targets} nghttp2)
 SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/nghttp2.pdb)
 TARGET_LINK_LIBRARIES(nghttp2 ${SYSTEM_LIBS})
-SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "_U_=;ssize_t=long;NGHTTP2_RC_VERSION=${nghttp2_rc_version}")
+SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "_U_=;ssize_t=long;NGHTTP2_RC_VERSION=${nghttp2_rc_version};BUILDING_NGHTTP2")
 
 INSTALL(TARGETS ${install_targets}
         RUNTIME DESTINATION bin
