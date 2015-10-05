@@ -20,6 +20,7 @@ History
 -------
 
 * 2015-10-05
+  * Fix debug build settings (output filenames, _DEBUG)
   * Fix DLL linkage warnings due to missing define
   * Add .rc file and related build processing
   * Clean up version string manipulation
@@ -31,11 +32,9 @@ History
 Future plans
 ------------
 
-1. Name the libraries differently for debug vs. release, similar to `lib\Makefile.msvc`.
-2. Investigate how `_DEBUG` should get defined for MSVC debug builds.  (The issue is easy to see when running `exiftool` on a nghttp2 Debug DLL -- the version shows "release".)
-3. Build static library too.
-4. See what other nghttp2 features could/should be supported and see how the cmake build might support it.
-5. Propose it to the nghttp2 project.
+1. Build static library too.
+2. See what other nghttp2 features could/should be supported and see how the cmake build might support it.
+3. Propose it to the nghttp2 project.
  
 (Or just the last step if I don't find time to work on it further.)
 

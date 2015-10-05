@@ -25,6 +25,10 @@
 
 PROJECT(NGHTTP2 C)
 
+IF(NOT WIN32)
+  MESSAGE(FATAL_ERROR "This cmake support is currently for the Windows platform only.")
+ENDIF()
+
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
@@ -138,11 +142,19 @@ GET_NGHTTP2_VERSION_RC(${nghttp2_version_str} nghttp2_rc_version)
 SET(install_targets)
 SET(install_bin_pdb)
 
+SET(CMAKE_DEBUG_POSTFIX "d")
+
 ADD_LIBRARY(nghttp2 SHARED ${NGHTTP2_SOURCES} lib/nghttp2.rc)
 SET(install_targets ${install_targets} nghttp2)
-SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/nghttp2.pdb)
+IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/nghttp2d.pdb)
+  SET(debug_flag _DEBUG)
+ELSE()
+  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/nghttp2.pdb)
+  SET(debug_flag)
+ENDIF()
 TARGET_LINK_LIBRARIES(nghttp2 ${SYSTEM_LIBS})
-SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "_U_=;ssize_t=long;NGHTTP2_RC_VERSION=${nghttp2_rc_version};BUILDING_NGHTTP2")
+SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "_U_=;ssize_t=long;NGHTTP2_RC_VERSION=${nghttp2_rc_version};BUILDING_NGHTTP2;${debug_flag}")
 
 INSTALL(TARGETS ${install_targets}
         RUNTIME DESTINATION bin
