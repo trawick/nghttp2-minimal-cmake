@@ -29,6 +29,56 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 OPTION(INSTALL_PDB          "Install .pdb files (if generated)"  ON)
 
+FUNCTION(GET_NGHTTP2_VERSION_STRING output_version)
+  # Extract nghttp2 version from canonical source file
+  SET(configureac_filename ${PROJECT_SOURCE_DIR}/configure.ac)
+  FILE(STRINGS ${configureac_filename} configureac)
+  SET(version_found FALSE)
+  FOREACH(line ${configureac})
+    STRING(REGEX MATCH "^AC_INIT\\(\\[nghttp2\\], \\[(.*)\\], \\[" ignored ${line})
+    SET(nghttp2_version_str ${CMAKE_MATCH_1})
+    IF(NOT ${nghttp2_version_str} STREQUAL "")
+      SET(version_found TRUE)
+      BREAK()
+    ENDIF()
+  ENDFOREACH()
+  IF(NOT ${version_found})
+    MESSAGE(FATAL_ERROR "nghttp2 version string not found in source file ${configureac_filename}")
+  ENDIF()
+  SET(${output_version} ${nghttp2_version_str} PARENT_SCOPE)
+ENDFUNCTION()
+
+FUNCTION(GET_NGHTTP2_MAJ_MIN_PATCH nghttp2_version_str ver_major ver_minor ver_patch)
+  # Given the nghttp2 version string, extract the major minor and patch components.
+  STRING(REPLACE "." " " version_components ${nghttp2_version_str})
+  STRING(REPLACE "-" " " version_components ${version_components})
+  SEPARATE_ARGUMENTS(version_components)
+  LIST(GET version_components 0 major)
+  LIST(GET version_components 1 minor)
+  LIST(GET version_components 2 patch)
+  SET(${ver_major} ${major} PARENT_SCOPE)
+  SET(${ver_minor} ${minor} PARENT_SCOPE)
+  SET(${ver_patch} ${patch} PARENT_SCOPE)
+ENDFUNCTION()
+
+FUNCTION(FILL_TO_2_DIGITS in_str out_str)
+  # Given a 1 or 2 digit input string, 0-fill to 2 digits
+  STRING(LENGTH ${in_str} len)
+  IF(len LESS 2)
+    SET(in_str "0${in_str}")
+  ENDIF()
+  SET(${out_str} ${in_str} PARENT_SCOPE)
+ENDFUNCTION()
+
+FUNCTION(GET_NGHTTP2_VERSION_HEX nghttp2_version_str ver_hex)
+  # Build hex version number from version string, which is either x.y.z or x.y.z-DEV
+  GET_NGHTTP2_MAJ_MIN_PATCH(${nghttp2_version_str} ver_major ver_minor ver_patch)
+  FILL_TO_2_DIGITS(${ver_major} filled_major)
+  FILL_TO_2_DIGITS(${ver_minor} filled_minor)
+  FILL_TO_2_DIGITS(${ver_patch} filled_patch)
+  SET(${ver_hex} "0x${filled_major}${filled_minor}${filled_patch}" PARENT_SCOPE)
+ENDFUNCTION()
+
 SET(NGHTTP2_SOURCES
   lib/nghttp2_pq.c
   lib/nghttp2_map.c
@@ -68,44 +118,12 @@ SET(NGHTTP2_PUBLIC_HEADERS_GENERATED
   ${PROJECT_BINARY_DIR}/nghttp2/nghttp2ver.h
 )
 
-# Extract nghttp2 version from canonical source
-SET(configureac_filename ${PROJECT_SOURCE_DIR}/configure.ac)
-FILE(STRINGS ${configureac_filename} configureac)
-SET(version_found FALSE)
-FOREACH(line ${configureac})
-  STRING(REGEX MATCH "^AC_INIT\\(\\[nghttp2\\], \\[(.*)\\], \\[" ignored ${line})
-  SET(nghttp2_version_str ${CMAKE_MATCH_1})
-  IF(NOT ${nghttp2_version_str} STREQUAL "")
-    SET(version_found TRUE)
-    BREAK()
-  ENDIF()
-ENDFOREACH()
-IF(NOT ${version_found})
-  MESSAGE(FATAL_ERROR "nghttp2 version string not found in source file ${configureac_filename}")
-ENDIF()
-
+# Get nghttp2 version string in different forms for substitution
+# in nghttp2ver.h.in.
+GET_NGHTTP2_VERSION_STRING(nghttp2_version_str)
+GET_NGHTTP2_VERSION_HEX(${nghttp2_version_str} nghttp2_version_hex)
 SET(PACKAGE_VERSION "${nghttp2_version_str}")
-# Build hex version number from version string, which is either x.y.z or x.y.z-DEV
-# First, split version string into major/minor/patch.
-STRING(REPLACE "." " " version_components ${nghttp2_version_str})
-STRING(REPLACE "-" " " version_components ${version_components})
-SEPARATE_ARGUMENTS(version_components)
-LIST(GET version_components 0 ver_major)
-LIST(GET version_components 1 ver_minor)
-LIST(GET version_components 2 ver_patch)
-STRING(LENGTH ${ver_major} len)
-IF(len LESS 2)
-  SET(ver_major "0${ver_major}")
-ENDIF()
-STRING(LENGTH ${ver_minor} len)
-IF(len LESS 2)
-  SET(ver_minor "0${ver_minor}")
-ENDIF()
-STRING(LENGTH ${ver_patch} len)
-IF(len LESS 2)
-  SET(ver_patch "0${ver_patch}")
-ENDIF()
-SET(PACKAGE_VERSION_NUM "0x${ver_major}${ver_minor}${ver_patch}")
+SET(PACKAGE_VERSION_NUM ${nghttp2_version_hex})
 CONFIGURE_FILE(lib/includes/nghttp2/nghttp2ver.h.in
                ${PROJECT_BINARY_DIR}/nghttp2/nghttp2ver.h)
 
