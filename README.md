@@ -8,7 +8,7 @@ Instructions
 
 1. Download and unpack nghttp2-1.3.4.zip (the only version I tested) from https://nghttp2.org/.
 2. Copy the `CMakeLists.txt` file from this repository to the top-level nghttp2 source directory.
-3. Copy the `nghttp2.rc` file from this repository to the lib subdirectory of the top-level nghttp2 source directory.
+3. Copy the `nghttp2.rc` file from this repository to the `lib` subdirectory of the top-level nghttp2 source directory.
 4. Open a Visual Studio command prompt with `cmake` in `PATH` and run the following commands from a scratch (build) directory:
 ```
 cmake -DCMAKE_INSTALL_PREFIX=c:\path\to\install -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo c:\path\to\nghttp2-1.3.4
