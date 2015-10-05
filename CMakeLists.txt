@@ -79,6 +79,12 @@ FUNCTION(GET_NGHTTP2_VERSION_HEX nghttp2_version_str ver_hex)
   SET(${ver_hex} "0x${filled_major}${filled_minor}${filled_patch}" PARENT_SCOPE)
 ENDFUNCTION()
 
+FUNCTION(GET_NGHTTP2_VERSION_RC nghttp2_version_str ver_rc)
+  # Build maj,min,patch,0 version string for .rc file
+  GET_NGHTTP2_MAJ_MIN_PATCH(${nghttp2_version_str} ver_major ver_minor ver_patch)
+  SET(${ver_rc} "${ver_major},${ver_minor},${ver_patch},0" PARENT_SCOPE)
+ENDFUNCTION()
+
 SET(NGHTTP2_SOURCES
   lib/nghttp2_pq.c
   lib/nghttp2_map.c
@@ -126,15 +132,17 @@ SET(PACKAGE_VERSION "${nghttp2_version_str}")
 SET(PACKAGE_VERSION_NUM ${nghttp2_version_hex})
 CONFIGURE_FILE(lib/includes/nghttp2/nghttp2ver.h.in
                ${PROJECT_BINARY_DIR}/nghttp2/nghttp2ver.h)
+# And in another form for use in the .rc file
+GET_NGHTTP2_VERSION_RC(${nghttp2_version_str} nghttp2_rc_version)
 
 SET(install_targets)
 SET(install_bin_pdb)
 
-ADD_LIBRARY(nghttp2 SHARED ${NGHTTP2_SOURCES})
+ADD_LIBRARY(nghttp2 SHARED ${NGHTTP2_SOURCES} lib/nghttp2.rc)
 SET(install_targets ${install_targets} nghttp2)
 SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/nghttp2.pdb)
 TARGET_LINK_LIBRARIES(nghttp2 ${SYSTEM_LIBS})
-SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "_U_=;ssize_t=long")
+SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "_U_=;ssize_t=long;NGHTTP2_RC_VERSION=${nghttp2_rc_version}")
 
 INSTALL(TARGETS ${install_targets}
         RUNTIME DESTINATION bin

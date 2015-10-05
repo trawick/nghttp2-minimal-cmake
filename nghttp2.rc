@@ -1,0 +1,40 @@
+#include <winver.h>
+#include "nghttp2/nghttp2ver.h"
+
+VS_VERSION_INFO VERSIONINFO
+  FILEVERSION    NGHTTP2_RC_VERSION
+  PRODUCTVERSION NGHTTP2_RC_VERSION
+  FILEFLAGSMASK  0x3fL
+  FILEOS         0x40004L
+  FILETYPE       0x2L
+  FILESUBTYPE    0x0L
+#ifdef _DEBUG
+  #define        VER_STR  NGHTTP2_VERSION ".0 (debug)"
+  #define        DBG      "d"
+  FILEFLAGS      0x1L
+#else
+  #define        VER_STR  NGHTTP2_VERSION ".0 (release)"
+  #define        DBG      ""
+  FILEFLAGS      0x0L
+#endif
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "CompanyName",      "http://tatsuhiro-t.github.io/nghttp2/"
+      VALUE "FileDescription",  "nghttp2; HTTP/2 C library"
+      VALUE "FileVersion",      VER_STR
+      VALUE "InternalName",     "nghttp2" DBG
+      VALUE "LegalCopyright",   "The MIT License"
+      VALUE "LegalTrademarks",  ""
+      VALUE "OriginalFilename", "nghttp2" DBG ".dll"
+      VALUE "ProductName",      "NGHTTP2."
+      VALUE "ProductVersion",   VER_STR
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
