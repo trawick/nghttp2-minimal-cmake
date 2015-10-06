@@ -1,7 +1,7 @@
 # nghttp2-minimal-cmake
 Minimal cmake support to build core nghttp2 library on Windows
 
-This should of course live in the nghttp2 repository but the current state is "quick and dirty" and I intend to make some improvements before submitting it to the nghttp2 project.  (See future plans below.)
+This should of course live in the nghttp2 repository but it is not quite a perfect replacement for the existing makefile, and I hope to resolve that before submitting it to the nghttp2 project.  (See future plans below.)
 
 Instructions
 ------------
@@ -19,6 +19,8 @@ nmake install
 History
 -------
 
+* 2015-10-06
+  * Build static library too
 * 2015-10-05
   * Fix debug build settings (output filenames, _DEBUG)
   * Fix DLL linkage warnings due to missing define
@@ -32,8 +34,8 @@ History
 Future plans
 ------------
 
-1. Build static library too.
-2. See what other nghttp2 features could/should be supported and see how the cmake build might support it.
+1. Decide if I want to mess with the Python build
+2. Look for other things that should be built
 3. Propose it to the nghttp2 project.
  
 (Or just the last step if I don't find time to work on it further.)

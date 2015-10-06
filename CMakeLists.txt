@@ -144,17 +144,28 @@ SET(install_bin_pdb)
 
 SET(CMAKE_DEBUG_POSTFIX "d")
 
-ADD_LIBRARY(nghttp2 SHARED ${NGHTTP2_SOURCES} lib/nghttp2.rc)
-SET(install_targets ${install_targets} nghttp2)
+# Set CFLAGS for debug vs. release and shared vs. static
+SET(base_CFLAGS "_U_=;ssize_t=long")
 IF(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/nghttp2d.pdb)
-  SET(debug_flag _DEBUG)
+  SET(dll_basename "nghttp2d")
+  SET(base_CFLAGS "${base_CFLAGS};_DEBUG")
 ELSE()
-  SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/nghttp2.pdb)
-  SET(debug_flag)
+  SET(dll_basename "nghttp2")
 ENDIF()
+# The .rc file (and corresponding _RC_ version) is only used for the .dll
+SET(shared_CFLAGS "${base_CFLAGS};NGHTTP2_RC_VERSION=${nghttp2_rc_version};BUILDING_NGHTTP2")
+SET(static_CFLAGS "${base_CFLAGS};NGHTTP2_STATICLIB")
+
+ADD_LIBRARY(nghttp2 SHARED ${NGHTTP2_SOURCES} ${NGHTTP2_PUBLIC_HEADERS_GENERATED} lib/nghttp2.rc)
+SET(install_targets ${install_targets} nghttp2)
+SET(install_bin_pdb ${install_bin_pdb} ${PROJECT_BINARY_DIR}/${dll_basename}.pdb)
 TARGET_LINK_LIBRARIES(nghttp2 ${SYSTEM_LIBS})
-SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "_U_=;ssize_t=long;NGHTTP2_RC_VERSION=${nghttp2_rc_version};BUILDING_NGHTTP2;${debug_flag}")
+SET_TARGET_PROPERTIES(nghttp2 PROPERTIES COMPILE_DEFINITIONS "${shared_CFLAGS}")
+
+ADD_LIBRARY(nghttp2-static STATIC ${NGHTTP2_SOURCES} ${NGHTTP2_PUBLIC_HEADERS_GENERATED})
+SET(install_targets ${install_targets} nghttp2-static)
+TARGET_LINK_LIBRARIES(nghttp2-static ${SYSTEM_LIBS})
+SET_TARGET_PROPERTIES(nghttp2-static PROPERTIES COMPILE_DEFINITIONS "${static_CFLAGS}")
 
 INSTALL(TARGETS ${install_targets}
         RUNTIME DESTINATION bin
