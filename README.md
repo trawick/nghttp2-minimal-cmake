@@ -1,7 +1,7 @@
 # nghttp2-minimal-cmake
 Minimal cmake support to build core nghttp2 library on Windows
 
-This should of course live in the nghttp2 repository but it is not quite a perfect replacement for the existing makefile, and I hope to resolve that before submitting it to the nghttp2 project.  (See future plans below.)
+This should of course live in the nghttp2 repository but it is not yet a perfect replacement for the existing makefile.  (See future plans below.)
 
 Instructions
 ------------
@@ -34,7 +34,7 @@ History
 Future plans
 ------------
 
-1. Decide if I want to mess with the Python build
+1. Get the Python build working
 2. Look for other things that should be built
 3. Propose it to the nghttp2 project.
  
